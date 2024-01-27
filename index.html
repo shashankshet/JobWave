@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JobWave Germany</title>
+    <!-- Include Bootstrap CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8f9fa;
+            padding: 20px;
+            transition: background-color 0.3s, color 0.3s;
+        }
+        body.dark-mode {
+            background-color: #000;
+            color: #fff;
+        }
+        h1 {
+            text-align: center;
+            color: #3498db;
+            margin-bottom: 10px;
+        }
+        .job {
+            border: 1px solid #ddd;
+            background-color: #fff;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            transition: background-color 0.3s;
+        }
+        body.dark-mode .job {
+            background-color: #111;
+            border-color: #333;
+        }
+        h2 {
+            margin-bottom: 10px;
+            color: #3498db;
+        }
+        p {
+            margin: 10px 0;
+        }
+        a {
+            color: #3498db;
+            text-decoration: none;
+            display: inline-block;
+            margin-top: 10px;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+        .filter-input {
+        margin-bottom: 20px;
+        padding: 15px;
+        font-size: 16px;
+        border-radius: 10px;
+        transition: background-color 0.3s, color 0.3s; /* Add color transition */
+        color: #000; /* Set default text color for light mode */
+    }
+
+    body.dark-mode .filter-input {
+        background-color: #333;
+        color: #fff; /* Set text color for dark mode */
+    }
+        .search-label {
+            font-size: 18px;
+            margin-bottom: 10px;
+        }
+        .apply-button {
+            background-color: #3498db;
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            font-size: 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .apply-button:hover {
+            background-color: #2980b9;
+        }
+        .company-name {
+            font-weight: bold;
+            color: #3498db;
+        }
+        .toggle-mode-btn {
+            position: fixed;
+            top: 5px;
+            right: 5px;
+            padding: 2px;
+            background-color: #3498db;
+            color: #fff;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 10px;
+            transition: background-color 0.3s;
+            z-index: 999;
+        }
+        .toggle-mode-btn:hover {
+            background-color: #2980b9;
+        }
+
+        .powered-by {
+            text-align: center;
+            font-size: 12px;
+            margin-top: 5px; /* Reduce the margin */
+            margin-bottom: 20px; /* Adjust as needed */
+            color: #555; /* Adjust color as needed */
+        }
+    </style>
+
+    <script>
+        // Get the server URL from the environment or use a default value
+        const serverUrl = process.env.SERVER_URL || 'http://localhost:3000/api/job-board-api';
+    </script>
+</head>
+<body>
+    <div class="container">
+        <h1 class="mt-3">JobWave Germany</h1>
+
+        <div class="powered-by">Powered by <a href="https://www.arbeitnow.com/">arbeitnow</a></div>
+
+        <div class="form-group">
+            <label class="search-label" for="searchInput">Find your dream job!</label>
+            <input type="text" id="searchInput" class="form-control filter-input" placeholder="Enter a job title, company, skill, location, etc">
+        </div>
+
+        <div id="jobListings"></div>
+    </div>
+
+    <button class="toggle-mode-btn" onclick="toggleMode()">
+        <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="currentColor" class="bi bi-moon" viewBox="0 0 16 16">
+            <path d="M6 .278a.77.77 0 0 1 .08.858 7.2 7.2 0 0 0-.878 3.46c0 4.021 3.278 7.277 7.318 7.277q.792-.001 1.533-.16a.79.79 0 0 1 .81.316.73.73 0 0 1-.031.893A8.35 8.35 0 0 1 8.344 16C3.734 16 0 12.286 0 7.71 0 4.266 2.114 1.312 5.124.06A.75.75 0 0 1 6 .278M4.858 1.311A7.27 7.27 0 0 0 1.025 7.71c0 4.02 3.279 7.276 7.319 7.276a7.32 7.32 0 0 0 5.205-2.162q-.506.063-1.029.063c-4.61 0-8.343-3.714-8.343-8.29 0-1.167.242-2.278.681-3.286"/>
+        </svg>
+    </button>
+
+    <!-- Include Bootstrap JS and Popper.js for Bootstrap functionality -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.10.2/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const jobListingsContainer = document.getElementById('jobListings');
+            const searchInput = document.getElementById('searchInput');
+    
+            let jobsData = [];  // Store the original job data
+    
+            // Fetch job data from the local proxy server
+            fetch(serverUrl)
+                .then(response => response.json())
+                .then(data => {
+                    jobsData = data.data;
+                    renderJobListings(jobsData);
+                })
+                .catch(error => console.error('Error fetching job data:', error));
+    
+            // Add event listener for input change
+            searchInput.addEventListener('input', applyFilters);
+    
+            function renderJobListings(jobs) {
+                jobListingsContainer.innerHTML = '';
+    
+                jobs.forEach(job => {
+                    const jobElement = document.createElement('div');
+                    jobElement.classList.add('job', 'shadow');
+    
+                    const titleElement = document.createElement('h2');
+                    titleElement.textContent = job.title;
+    
+                    const companyElement = document.createElement('p');
+                    companyElement.innerHTML = `Company: <span class="company-name">${job.company_name}</span>`;
+    
+                    const descriptionElement = document.createElement('p');
+                    descriptionElement.innerHTML = job.description;
+    
+                    const locationElement = document.createElement('p');
+                    locationElement.textContent = `Location: ${job.location}`;
+    
+                    const tagsElement = document.createElement('p');
+                    tagsElement.textContent = `Tags: ${job.tags.join(', ')}`;
+    
+                    const applyButton = document.createElement('button');
+                    applyButton.classList.add('apply-button', 'mt-2');
+                    applyButton.textContent = 'Apply Now';
+                    applyButton.addEventListener('click', function () {
+                        window.location.href = job.url;
+                    });
+    
+                    jobElement.appendChild(titleElement);
+                    jobElement.appendChild(companyElement);
+                    jobElement.appendChild(descriptionElement);
+                    jobElement.appendChild(locationElement);
+                    jobElement.appendChild(tagsElement);
+                    jobElement.appendChild(applyButton);
+    
+                    jobListingsContainer.appendChild(jobElement);
+                });
+            }
+    
+            function applyFilters() {
+                const searchTerm = searchInput.value.toLowerCase();
+                const filteredJobs = jobsData.filter(job =>
+                    job.title.toLowerCase().includes(searchTerm) ||
+                    job.company_name.toLowerCase().includes(searchTerm) ||
+                    job.location.toLowerCase().includes(searchTerm) ||
+                    job.tags.some(tag => tag.toLowerCase().includes(searchTerm))
+                );
+                renderJobListings(filteredJobs);
+            }
+    
+            
+            window.toggleMode = function () {
+                document.body.classList.toggle('dark-mode');
+            };
+        });
+    </script>
+    
+</body>
+</html>
