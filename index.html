@@ -52,18 +52,18 @@
             text-decoration: underline;
         }
         .filter-input {
-        margin-bottom: 20px;
-        padding: 15px;
-        font-size: 16px;
-        border-radius: 10px;
-        transition: background-color 0.3s, color 0.3s; /* Add color transition */
-        color: #000; /* Set default text color for light mode */
-    }
+            margin-bottom: 20px;
+            padding: 15px;
+            font-size: 16px;
+            border-radius: 10px;
+            transition: background-color 0.3s, color 0.3s; /* Add color transition */
+            color: #000; /* Set default text color for light mode */
+        }
 
-    body.dark-mode .filter-input {
-        background-color: #333;
-        color: #fff; /* Set text color for dark mode */
-    }
+        body.dark-mode .filter-input {
+            background-color: #333;
+            color: #fff; /* Set text color for dark mode */
+        }
         .search-label {
             font-size: 18px;
             margin-bottom: 10px;
@@ -146,9 +146,9 @@
         document.addEventListener('DOMContentLoaded', function () {
             const jobListingsContainer = document.getElementById('jobListings');
             const searchInput = document.getElementById('searchInput');
-    
+
             let jobsData = [];  // Store the original job data
-    
+
             // Fetch job data from the local proxy server
             fetch(serverUrl)
                 .then(response => response.json())
@@ -157,50 +157,50 @@
                     renderJobListings(jobsData);
                 })
                 .catch(error => console.error('Error fetching job data:', error));
-    
+
             // Add event listener for input change
             searchInput.addEventListener('input', applyFilters);
-    
+
             function renderJobListings(jobs) {
                 jobListingsContainer.innerHTML = '';
-    
+
                 jobs.forEach(job => {
                     const jobElement = document.createElement('div');
                     jobElement.classList.add('job', 'shadow');
-    
+
                     const titleElement = document.createElement('h2');
                     titleElement.textContent = job.title;
-    
+
                     const companyElement = document.createElement('p');
                     companyElement.innerHTML = `Company: <span class="company-name">${job.company_name}</span>`;
-    
+
                     const descriptionElement = document.createElement('p');
                     descriptionElement.innerHTML = job.description;
-    
+
                     const locationElement = document.createElement('p');
                     locationElement.textContent = `Location: ${job.location}`;
-    
+
                     const tagsElement = document.createElement('p');
                     tagsElement.textContent = `Tags: ${job.tags.join(', ')}`;
-    
+
                     const applyButton = document.createElement('button');
                     applyButton.classList.add('apply-button', 'mt-2');
                     applyButton.textContent = 'Apply Now';
                     applyButton.addEventListener('click', function () {
                         window.location.href = job.url;
                     });
-    
+
                     jobElement.appendChild(titleElement);
                     jobElement.appendChild(companyElement);
                     jobElement.appendChild(descriptionElement);
                     jobElement.appendChild(locationElement);
                     jobElement.appendChild(tagsElement);
                     jobElement.appendChild(applyButton);
-    
+
                     jobListingsContainer.appendChild(jobElement);
                 });
             }
-    
+
             function applyFilters() {
                 const searchTerm = searchInput.value.toLowerCase();
                 const filteredJobs = jobsData.filter(job =>
@@ -211,13 +211,13 @@
                 );
                 renderJobListings(filteredJobs);
             }
-    
-            
+
+
             window.toggleMode = function () {
                 document.body.classList.toggle('dark-mode');
             };
         });
     </script>
-    
+
 </body>
 </html>
